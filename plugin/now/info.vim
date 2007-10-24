@@ -1,6 +1,6 @@
 " Vim plugin file
 " Maintainer:	    Nikolai Weibull <now@bitwi.se>
-" Latest Revision:  2006-07-19
+" Latest Revision:  2007-10-24
 
 if exists('loaded_plugin_now_info')
   finish
@@ -10,10 +10,6 @@ let loaded_plugin_now_info = 1
 
 let s:cpo_save = &cpo
 set cpo&vim
-
-runtime lib/now.vim
-runtime lib/now/vim.vim
-runtime lib/now/vim/position.vim
 
 if !exists('g:now_info_buffer_name')
   let g:now_info_buffer_name = 'Info: '
@@ -110,7 +106,7 @@ function s:info_exec(file, node, ...)
     if exists('b:info_file')
       let last_file = b:info_file
       let last_node = b:info_node
-      let last_mark = g:NOW.Vim.Position.current()
+      let last_mark = now#vim#mark#cursor()
     endif
   endif
   
@@ -172,7 +168,7 @@ function s:info_buffer_init()
     execute 'syn match infoLink	/' .
           \ g:now_info_index_highlight_regex . '/hs=s+2,he=e-2'
     execute 'syn match infoLink +' . g:now_info_url_regex . '+'
-    syn region infoLink		start=/\*[Nn]ote/ end=/\(::\|[.,]\)/
+    syn region infoLink	start=/\*[Nn]ote/ end=/\(::\|[.,]\)/
 
     " TODO: is this test still needed?
     if !exists("g:did_info_syntax_inits")
