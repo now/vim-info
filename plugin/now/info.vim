@@ -1,11 +1,6 @@
-" Vim plugin file
-" Maintainer:	    Nikolai Weibull <now@bitwi.se>
-" Latest Revision:  2007-10-24
-
 if exists('loaded_plugin_now_info')
   finish
 endif
-
 let loaded_plugin_now_info = 1
 
 let s:cpo_save = &cpo
@@ -64,14 +59,15 @@ endif
 
 command! -nargs=* Info call s:info(<f-args>)
 
-augroup Info
-  execute 'au BufUnload ' .
+augroup plugin-now-info
+  autocmd!
+  execute 'autocmd BufUnload ' .
         \ escape(g:now_info_buffer_name, '\ ') . '*  setlocal nobuflisted'
-augroup END
+augroup end
 
 let s:info_search_string = ''
 
-function s:info(...)
+function! s:info(...)
   if a:0 > 0
     let file = a:1
     if file[0] != '('
@@ -101,7 +97,7 @@ function s:info(...)
   endif
 endfunction
 
-function s:info_exec(file, node, ...)
+function! s:info_exec(file, node, ...)
   if a:0 == 0
     if exists('b:info_file')
       let last_file = b:info_file
@@ -156,7 +152,7 @@ function s:info_exec(file, node, ...)
   endif
 endfunction
 
-function s:info_buffer_init()
+function! s:info_buffer_init()
   if has('syntax') && exists('g:syntax_on')
     syn case match
     syn match infoMenuTitle /^\* Menu:/hs=s+2,he=e-1
@@ -189,22 +185,22 @@ function s:info_buffer_init()
   noremap <buffer> <silent> T :call <SID>top_node()<CR>
   noremap <buffer> <silent> d :call <SID>dir_node()<CR>
   noremap <buffer> <silent> h :call <SID>last_node()<CR>
-  noremap <buffer> <silent> t :call <SID>next_ref()<CR>
-  noremap <buffer> <silent> n :call <SID>prev_ref()<CR>
+  noremap <buffer> <silent> j :call <SID>next_ref()<CR>
+  noremap <buffer> <silent> k :call <SID>prev_ref()<CR>
   noremap <buffer> <silent> s :call <SID>follow_link()<CR>
   noremap <buffer> <silent> S :call <SID>search()<CR>
   noremap <buffer> <silent> q :q!<CR>
   noremap <buffer> <silent> H :call <SID>help()<CR>
 endfunction
 
-function s:help()
+function! s:help()
   echohl Title
   echo '                           Info Browser Keys'
   echo 'Key              Action'
   echo '------------------------------------------------------------------------'
   echohl None
-  echo 't                Move to next reference or scroll forward (line down)'
-  echo 'n                Move to previous reference or scroll backward (line up)'
+  echo 'j                Move to next reference or scroll forward (line down)'
+  echo 'k                Move to previous reference or scroll backward (line up)'
   echo 's                Follow reference under cursor'
   echo 'h                Return to last viewed node'
   echo '>                Move to node following the current one ("next")'
@@ -218,7 +214,7 @@ function s:help()
   echo 'q                Quit browser'
 endfunction
 
-function s:info_is_first_line()
+function! s:info_is_first_line()
   let b:info_prev_node = ''
   let b:info_next_node = ''
   let b:info_up_node = ''
@@ -241,7 +237,7 @@ function s:info_is_first_line()
   return 1
 endfunction
 
-function s:get_submatch(string, regex)
+function! s:get_submatch(string, regex)
   let matched = matchstr(a:string, a:regex)
   if matched != ""
     let matched = substitute(matched, a:regex, '\1', "")
@@ -249,46 +245,46 @@ function s:get_submatch(string, regex)
   return matched
 endfunction
 
-function s:node_is_valid(node)
+function! s:node_is_valid(node)
   return a:node != "" && match(a:node, '(.*)') == -1
 endfunction
 
-function s:goto_node(node)
+function! s:goto_node(node)
   if !s:node_is_valid(a:node)
     return
   endif
   call s:info_exec(b:info_file, a:node)
 endfunction
 
-function s:next_node()
+function! s:next_node()
   call s:goto_node(b:info_next_node)
 endfunction
 
-function s:prev_node()
+function! s:prev_node()
   call s:goto_node(b:info_prev_node)
 endfunction
 
-function s:up_node()
+function! s:up_node()
   call s:goto_node(b:info_up_node)
 endfunction
 
-function s:top_node()
+function! s:top_node()
   if b:info_node != 'Top' || b:info_file != '(dir)'
     call s:info_exec(b:info_node == 'Top' ? '(dir)' : b:info_file, 'Top')
   endif
 endfunction
 
-function s:dir_node()
+function! s:dir_node()
   call s:info_exec('(dir)', 'Top')
 endfunction
 
-function s:last_node()
+function! s:last_node()
   if exists('b:info_last_file')
     call s:info_exec(b:info_last_file, b:info_last_node, b:info_last_mark)
   endif
 endfunction
 
-function s:follow_link()
+function! s:follow_link()
   let cur_line = getline('.')
   let idx = col('.') - 1
   let link = matchstr(cur_line, g:now_info_note_regex, idx)
@@ -345,7 +341,7 @@ function s:follow_link()
   call s:info_exec(file, node)
 endfunction
 
-function s:goto_ref(direction)
+function! s:goto_ref(direction)
   let regex = '\%('.g:now_info_dir_regex.'\|'.g:now_info_menu_regex.'\|'.
 	\g:now_info_note_regex.'\|'.g:now_info_index_highlight_regex.'\|'.
 	\g:now_info_url_regex.'\)'
@@ -387,17 +383,17 @@ function s:goto_ref(direction)
   return 0
 endfunction
 
-function s:next_ref()
+function! s:next_ref()
   call s:goto_ref(1)
 endfunction
 
-function s:prev_ref()
+function! s:prev_ref()
   call s:goto_ref(0)
 endfunction
 
 " XXX: should move forward one character if searching again at same pos
 " XXX: this doesn't work correctly if no match is found
-function s:search()
+function! s:search()
   let search_term = input('Search all nodes: ', s:info_search_string)
   if search_term == ''
     return
@@ -424,3 +420,4 @@ function s:search()
 endfunction
 
 let &cpo = s:cpo_save
+unlet s:cpo_save
