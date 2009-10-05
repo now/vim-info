@@ -1,4 +1,4 @@
-VIMBALL = vim-info.vba
+VIMBALL = info.vba
 
 FILES = \
 	plugin/now/info.vim
